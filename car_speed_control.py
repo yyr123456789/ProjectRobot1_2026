@@ -1,43 +1,43 @@
-from car_direction_control import *
+from car_config import *
 
-class PathExecutor:
-    def __init__(self, base_speed: int = DEFAULT_MOTOR_SPEED):
-        self.base_speed = base_speed
-        self.task_list = []
+def clamp_speed(speed_value: int) -> int:
+    abs_spd = abs(speed_value)
+    return max(MIN_MOTOR_SPEED, min(abs_spd, MAX_MOTOR_SPEED))
 
-    def add_task(self, action: str, duration_ms: int, custom_speed = None):
-        run_spd = custom_speed if custom_speed is not None else self.base_speed
-        self.task_list.append({
-            "action": action,
-            "time": duration_ms,
-            "speed": run_spd
-        })
+def set_left_motor(speed_value: int):
+    spd = clamp_speed(speed_value)
+    if speed_value > 0:
+        MOTOR_LEFT_FORWARD.write_analog(spd)
+        MOTOR_LEFT_BACKWARD.write_analog(0)
+    else:
+        MOTOR_LEFT_FORWARD.write_analog(0)
+        MOTOR_LEFT_BACKWARD.write_analog(spd)
 
-    def execute_all(self):
-        action_map = {
-            "forward": move_forward,
-            "backward": move_backward,
-            "left": pivot_left,
-            "right": pivot_right,
-            "curve_l": curve_left,
-            "curve_r": curve_right,
-            "stop": full_stop
-        }
-        for task in self.task_list:
-            func = action_map[task["action"]]
-            func(task["speed"])
-            sleep(task["time"])
-        full_stop()
-        display.show(Image.HAPPY)
+def set_right_motor(speed_value: int):
+    spd = clamp_speed(speed_value)
+    if speed_value > 0:
+        MOTOR_RIGHT_FORWARD.write_analog(spd)
+        MOTOR_RIGHT_BACKWARD.write_analog(0)
+    else:
+        MOTOR_RIGHT_FORWARD.write_analog(0)
+        MOTOR_RIGHT_BACKWARD.write_analog(spd)
+
+def full_stop():
+    set_left_motor(0)
+    set_right_motor(0)
+    display.show(Image.SAD)
+
+def move_forward(speed: int = DEFAULT_MOTOR_SPEED):
+    set_left_motor(speed)
+    set_right_motor(speed)
+    display.show(Image.ARROW_N)
+
+def move_backward(speed: int = DEFAULT_MOTOR_SPEED):
+    set_left_motor(-speed)
+    set_right_motor(-speed)
+    display.show(Image.ARROW_S)
 
 if __name__ == "__main__":
-    square = PathExecutor(700)
-    square.add_task("forward", 2000)
-    square.add_task("right", 1200)
-    square.add_task("forward", 2000)
-    square.add_task("right", 1200)
-    square.add_task("forward", 2000)
-    square.add_task("right", 1200)
-    square.add_task("forward", 2000)
-    square.add_task("stop", 500)
-    square.execute_all()
+    move_forward(800)
+    sleep(2000)
+    full_stop()
