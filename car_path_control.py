@@ -1,30 +1,43 @@
-from car_speed_control import *
+from car_direction_control import *
 
-def pivot_left(speed: int = DEFAULT_MOTOR_SPEED):
-    set_left_motor(-speed // 2)
-    set_right_motor(speed)
-    display.show(Image.ARROW_W)
+class PathExecutor:
+    def __init__(self, base_speed: int = DEFAULT_MOTOR_SPEED):
+        self.base_speed = base_speed
+        self.task_list = []
 
-def pivot_right(speed: int = DEFAULT_MOTOR_SPEED):
-    set_left_motor(speed)
-    set_right_motor(-speed // 2)
-    display.show(Image.ARROW_E)
+    def add_task(self, action: str, duration_ms: int, custom_speed = None):
+        run_spd = custom_speed if custom_speed is not None else self.base_speed
+        self.task_list.append({
+            "action": action,
+            "time": duration_ms,
+            "speed": run_spd
+        })
 
-def curve_left(speed: int = DEFAULT_MOTOR_SPEED):
-    set_left_motor(speed // 2)
-    set_right_motor(speed)
-
-def curve_right(speed: int = DEFAULT_MOTOR_SPEED):
-    set_left_motor(speed)
-    set_right_motor(speed // 2)
+    def execute_all(self):
+        action_map = {
+            "forward": move_forward,
+            "backward": move_backward,
+            "left": pivot_left,
+            "right": pivot_right,
+            "curve_l": curve_left,
+            "curve_r": curve_right,
+            "stop": full_stop
+        }
+        for task in self.task_list:
+            func = action_map[task["action"]]
+            func(task["speed"])
+            sleep(task["time"])
+        full_stop()
+        display.show(Image.HAPPY)
 
 if __name__ == "__main__":
-    move_forward()
-    sleep(1000)
-    pivot_left()
-    sleep(1500)
-    move_forward()
-    sleep(1000)
-    pivot_right()
-    sleep(1500)
-    full_stop()
+    square = PathExecutor(700)
+    square.add_task("forward", 2000)
+    square.add_task("right", 1200)
+    square.add_task("forward", 2000)
+    square.add_task("right", 1200)
+    square.add_task("forward", 2000)
+    square.add_task("right", 1200)
+    square.add_task("forward", 2000)
+    square.add_task("stop", 500)
+    square.execute_all()
