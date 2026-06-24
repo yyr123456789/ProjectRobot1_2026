@@ -1,39 +1,43 @@
-from car_config import *
+from car_direction_control import *
 
-def set_left_motor_speed(speed_value: int):
-    clamped_speed = max(MIN_MOTOR_SPEED, min(abs(speed_value), MAX_MOTOR_SPEED))
-    if speed_value > 0:
-        MOTOR_LEFT_FORWARD_PIN.write_analog(clamped_speed)
-        MOTOR_LEFT_BACKWARD_PIN.write_analog(0)
-    else:
-        MOTOR_LEFT_FORWARD_PIN.write_analog(0)
-        MOTOR_LEFT_BACKWARD_PIN.write_analog(clamped_speed)
+class PathExecutor:
+    def __init__(self, base_speed: int = DEFAULT_MOTOR_SPEED):
+        self.base_speed = base_speed
+        self.task_list = []
 
-def set_right_motor_speed(speed_value: int):
-    clamped_speed = max(MIN_MOTOR_SPEED, min(abs(speed_value), MAX_MOTOR_SPEED))
-    if speed_value > 0:
-        MOTOR_RIGHT_FORWARD_PIN.write_analog(clamped_speed)
-        MOTOR_RIGHT_BACKWARD_PIN.write_analog(0)
-    else:
-        MOTOR_RIGHT_FORWARD_PIN.write_analog(0)
-        MOTOR_RIGHT_BACKWARD_PIN.write_analog(clamped_speed)
+    def add_task(self, action: str, duration_ms: int, custom_speed = None):
+        run_spd = custom_speed if custom_speed is not None else self.base_speed
+        self.task_list.append({
+            "action": action,
+            "time": duration_ms,
+            "speed": run_spd
+        })
 
-def full_stop_car():
-    set_left_motor_speed(0)
-    set_right_motor_speed(0)
-    display.show(Image.SAD)
-
-def move_forward(speed: int = DEFAULT_MOTOR_SPEED):
-    set_left_motor_speed(speed)
-    set_right_motor_speed(speed)
-    display.show(Image.ARROW_N)
-
-def move_backward(speed: int = DEFAULT_MOTOR_SPEED):
-    set_left_motor_speed(-speed)
-    set_right_motor_speed(-speed)
-    display.show(Image.ARROW_S)
+    def execute_all(self):
+        action_map = {
+            "forward": move_forward,
+            "backward": move_backward,
+            "left": pivot_left,
+            "right": pivot_right,
+            "curve_l": curve_left,
+            "curve_r": curve_right,
+            "stop": full_stop
+        }
+        for task in self.task_list:
+            func = action_map[task["action"]]
+            func(task["speed"])
+            sleep(task["time"])
+        full_stop()
+        display.show(Image.HAPPY)
 
 if __name__ == "__main__":
-    move_forward(800)
-    sleep(2000)
-    full_stop_car()
+    square = PathExecutor(700)
+    square.add_task("forward", 2000)
+    square.add_task("right", 1200)
+    square.add_task("forward", 2000)
+    square.add_task("right", 1200)
+    square.add_task("forward", 2000)
+    square.add_task("right", 1200)
+    square.add_task("forward", 2000)
+    square.add_task("stop", 500)
+    square.execute_all()
