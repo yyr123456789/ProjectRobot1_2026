@@ -1,15 +1,15 @@
 from car_path_control import PathExecutor
-from privacy_data_handler import save_face_data_locally, wipe_all_face_data
+from privacy_data_handler import store_face_data, clear_all_data
 
 if __name__ == "__main__":
-    save_face_data_locally("robot_primary_owner_001")
+    store_face_data("robot_main_owner_001")
 
-    demo_path = PathExecutor(base_speed=650)
-    demo_path.add_movement_task("forward", 1500)
-    demo_path.add_movement_task("left", 1000)
-    demo_path.add_movement_task("forward", 1500)
-    demo_path.add_movement_task("right", 1000)
-    demo_path.add_movement_task("stop", 800)
+    demo_route = PathExecutor(650)
+    demo_route.add_task("forward", 1500)
+    demo_route.add_task("left", 1000)
+    demo_route.add_task("forward", 1500)
+    demo_route.add_task("right", 1000)
+    demo_route.add_task("stop", 800)
 
-    demo_path.run_all_stored_tasks()
-    wipe_all_face_data()
+    demo_route.execute_all()
+    clear_all_data()
