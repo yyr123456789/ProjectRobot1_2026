@@ -1,30 +1,43 @@
-from car_speed_control import *
+from car_config import *
 
-def pivot_turn_left(speed: int = DEFAULT_MOTOR_SPEED):
-    set_left_motor_speed(-speed // 2)
-    set_right_motor_speed(speed)
-    display.show(Image.ARROW_W)
+def clamp_speed(speed_value: int) -> int:
+    abs_spd = abs(speed_value)
+    return max(MIN_MOTOR_SPEED, min(abs_spd, MAX_MOTOR_SPEED))
 
-def pivot_turn_right(speed: int = DEFAULT_MOTOR_SPEED):
-    set_left_motor_speed(speed)
-    set_right_motor_speed(-speed // 2)
-    display.show(Image.ARROW_E)
+def set_left_motor(speed_value: int):
+    spd = clamp_speed(speed_value)
+    if speed_value > 0:
+        MOTOR_LEFT_FORWARD.write_analog(spd)
+        MOTOR_LEFT_BACKWARD.write_analog(0)
+    else:
+        MOTOR_LEFT_FORWARD.write_analog(0)
+        MOTOR_LEFT_BACKWARD.write_analog(spd)
 
-def gentle_curve_left(speed: int = DEFAULT_MOTOR_SPEED):
-    set_left_motor_speed(speed // 2)
-    set_right_motor_speed(speed)
+def set_right_motor(speed_value: int):
+    spd = clamp_speed(speed_value)
+    if speed_value > 0:
+        MOTOR_RIGHT_FORWARD.write_analog(spd)
+        MOTOR_RIGHT_BACKWARD.write_analog(0)
+    else:
+        MOTOR_RIGHT_FORWARD.write_analog(0)
+        MOTOR_RIGHT_BACKWARD.write_analog(spd)
 
-def gentle_curve_right(speed: int = DEFAULT_MOTOR_SPEED):
-    set_left_motor_speed(speed)
-    set_right_motor_speed(speed // 2)
+def full_stop():
+    set_left_motor(0)
+    set_right_motor(0)
+    display.show(Image.SAD)
+
+def move_forward(speed: int = DEFAULT_MOTOR_SPEED):
+    set_left_motor(speed)
+    set_right_motor(speed)
+    display.show(Image.ARROW_N)
+
+def move_backward(speed: int = DEFAULT_MOTOR_SPEED):
+    set_left_motor(-speed)
+    set_right_motor(-speed)
+    display.show(Image.ARROW_S)
 
 if __name__ == "__main__":
-    move_forward()
-    sleep(1000)
-    pivot_turn_left()
-    sleep(1500)
-    move_forward()
-    sleep(1000)
-    pivot_turn_right()
-    sleep(1500)
-    full_stop_car()
+    move_forward(800)
+    sleep(2000)
+    full_stop()
