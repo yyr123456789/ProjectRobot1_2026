@@ -27,7 +27,20 @@ def execute_step(direction, speed, duration):
 
     sleep(duration)
 
+def run_custom_path():
+    user_defined_path = [
+        ("forward", BASE_SPEED, 3000),
+        ("right", BASE_SPEED, 1000),
+        ("forward", BASE_SPEED, 2000),
+        ("left", BASE_SPEED, 1000),
+        ("backward", BASE_SPEED, 2000)
+    ]
 
+    for step in user_defined_path:
+        execute_step(step[0], step[1], step[2])
+
+    execute_step("stop", 0, 0)
+    print("Path sequence completed.")
 
 if __name__ == "__main__":
     display.show(Image.HAPPY)
