@@ -27,3 +27,19 @@ def execute_step(direction, speed, duration):
 
     sleep(duration)
 
+
+
+if __name__ == "__main__":
+    display.show(Image.HAPPY)
+    print("System Ready. Press Button A to run the custom path.")
+
+    while True:
+        if button_a.is_pressed():
+            print("Starting path execution...")
+            run_custom_path()
+
+        if button_b.is_pressed():
+            print("Emergency Stop Triggered!")
+            execute_step("stop", 0, 0)
+
+        sleep(100)
